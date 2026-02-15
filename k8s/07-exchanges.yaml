@@ -1,0 +1,83 @@
+# 1) Fanout Exchange — 場景 3 (Pub/Sub)
+apiVersion: rabbitmq.com/v1beta1
+kind: Exchange
+metadata:
+  name: notification-fanout
+  namespace: rabbitmq-poc
+spec:
+  name: notification.fanout
+  type: fanout
+  durable: true
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# 2) Direct Exchange — 場景 4 (Routing)
+apiVersion: rabbitmq.com/v1beta1
+kind: Exchange
+metadata:
+  name: order-direct
+  namespace: rabbitmq-poc
+spec:
+  name: order.direct
+  type: direct
+  durable: true
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# 3) Topic Exchange — 場景 5 (Topics)
+apiVersion: rabbitmq.com/v1beta1
+kind: Exchange
+metadata:
+  name: event-topic
+  namespace: rabbitmq-poc
+spec:
+  name: event.topic
+  type: topic
+  durable: true
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# 4) Headers Exchange — 場景 6 (Headers)
+apiVersion: rabbitmq.com/v1beta1
+kind: Exchange
+metadata:
+  name: report-headers
+  namespace: rabbitmq-poc
+spec:
+  name: report.headers
+  type: headers
+  durable: true
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# 5) DLX Exchange — 場景 8 (Dead Letter)
+apiVersion: rabbitmq.com/v1beta1
+kind: Exchange
+metadata:
+  name: dlx-exchange
+  namespace: rabbitmq-poc
+spec:
+  name: dlx.exchange
+  type: fanout
+  durable: true
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# 6) RPC Exchange — 場景 7 (RPC)
+apiVersion: rabbitmq.com/v1beta1
+kind: Exchange
+metadata:
+  name: rpc-exchange
+  namespace: rabbitmq-poc
+spec:
+  name: rpc.exchange
+  type: direct
+  durable: true
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster

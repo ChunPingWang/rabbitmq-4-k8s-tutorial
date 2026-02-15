@@ -1,0 +1,16 @@
+# DLX Policy: order.* queues 重試 3 次後轉 Dead Letter
+apiVersion: rabbitmq.com/v1beta1
+kind: Policy
+metadata:
+  name: order-dlx-policy
+  namespace: rabbitmq-poc
+spec:
+  name: order-dlx-policy
+  vhost: poc
+  pattern: "^order\\."
+  applyTo: queues
+  definition:
+    dead-letter-exchange: dlx.exchange
+    delivery-limit: 3
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster

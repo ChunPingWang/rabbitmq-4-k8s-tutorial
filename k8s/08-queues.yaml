@@ -1,0 +1,259 @@
+# === 場景 1: Simple Queue ===
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: simple-queue
+  namespace: rabbitmq-poc
+spec:
+  name: simple.queue
+  type: quorum
+  durable: true
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# === 場景 2: Work Queue ===
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: task-queue
+  namespace: rabbitmq-poc
+spec:
+  name: task.queue
+  type: quorum
+  durable: true
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# === 場景 3: Pub/Sub — 3 個 Consumer Queues ===
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: notification-email
+  namespace: rabbitmq-poc
+spec:
+  name: notification.email
+  type: quorum
+  durable: true
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: notification-sms
+  namespace: rabbitmq-poc
+spec:
+  name: notification.sms
+  type: quorum
+  durable: true
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: notification-push
+  namespace: rabbitmq-poc
+spec:
+  name: notification.push
+  type: quorum
+  durable: true
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# === 場景 4: Routing — 3 個 Order Queues ===
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: order-created
+  namespace: rabbitmq-poc
+spec:
+  name: order.created
+  type: quorum
+  durable: true
+  vhost: poc
+  arguments:
+    x-dead-letter-exchange: dlx.exchange
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: order-paid
+  namespace: rabbitmq-poc
+spec:
+  name: order.paid
+  type: quorum
+  durable: true
+  vhost: poc
+  arguments:
+    x-dead-letter-exchange: dlx.exchange
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: order-shipped
+  namespace: rabbitmq-poc
+spec:
+  name: order.shipped
+  type: quorum
+  durable: true
+  vhost: poc
+  arguments:
+    x-dead-letter-exchange: dlx.exchange
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# === 場景 5: Topic — 3 個 Consumer Queues ===
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: event-all-orders
+  namespace: rabbitmq-poc
+spec:
+  name: event.all-orders
+  type: quorum
+  durable: true
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: event-payments
+  namespace: rabbitmq-poc
+spec:
+  name: event.payments
+  type: quorum
+  durable: true
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: event-audit
+  namespace: rabbitmq-poc
+spec:
+  name: event.audit
+  type: quorum
+  durable: true
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# === 場景 6: Headers — 2 個 Consumer Queues ===
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: report-pdf
+  namespace: rabbitmq-poc
+spec:
+  name: report.pdf
+  type: quorum
+  durable: true
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: report-excel
+  namespace: rabbitmq-poc
+spec:
+  name: report.excel
+  type: quorum
+  durable: true
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# === 場景 7: RPC ===
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: rpc-credit-score
+  namespace: rabbitmq-poc
+spec:
+  name: rpc.credit-score
+  type: quorum
+  durable: true
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# === 場景 8: Dead Letter Queue ===
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: dead-letter-queue
+  namespace: rabbitmq-poc
+spec:
+  name: dead.letter.queue
+  type: quorum
+  durable: true
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# === 場景 9: Delayed Message — 停車場 Queue (TTL + DLX) ===
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: delay-parking
+  namespace: rabbitmq-poc
+spec:
+  name: delay.parking
+  type: classic
+  durable: true
+  vhost: poc
+  arguments:
+    x-dead-letter-exchange: order.direct
+    x-dead-letter-routing-key: order.created
+    x-message-ttl: 30000
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# === 場景 10: Priority Queue (Classic — Quorum 不支援 x-max-priority) ===
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: priority-queue
+  namespace: rabbitmq-poc
+spec:
+  name: priority.queue
+  type: classic
+  durable: true
+  vhost: poc
+  arguments:
+    x-max-priority: 10
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# === 場景 12: Stream ===
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: audit-stream
+  namespace: rabbitmq-poc
+spec:
+  name: audit.stream
+  type: stream
+  durable: true
+  vhost: poc
+  arguments:
+    x-max-length-bytes: 1073741824
+    x-stream-max-segment-size-bytes: 52428800
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster

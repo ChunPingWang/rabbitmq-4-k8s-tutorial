@@ -1,0 +1,187 @@
+# === 場景 3: Fanout → notification.* queues ===
+apiVersion: rabbitmq.com/v1beta1
+kind: Binding
+metadata:
+  name: fanout-to-email
+  namespace: rabbitmq-poc
+spec:
+  source: notification.fanout
+  destination: notification.email
+  destinationType: queue
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Binding
+metadata:
+  name: fanout-to-sms
+  namespace: rabbitmq-poc
+spec:
+  source: notification.fanout
+  destination: notification.sms
+  destinationType: queue
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Binding
+metadata:
+  name: fanout-to-push
+  namespace: rabbitmq-poc
+spec:
+  source: notification.fanout
+  destination: notification.push
+  destinationType: queue
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# === 場景 4: Direct → order.* queues (routing key) ===
+apiVersion: rabbitmq.com/v1beta1
+kind: Binding
+metadata:
+  name: direct-order-created
+  namespace: rabbitmq-poc
+spec:
+  source: order.direct
+  destination: order.created
+  destinationType: queue
+  routingKey: order.created
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Binding
+metadata:
+  name: direct-order-paid
+  namespace: rabbitmq-poc
+spec:
+  source: order.direct
+  destination: order.paid
+  destinationType: queue
+  routingKey: order.paid
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Binding
+metadata:
+  name: direct-order-shipped
+  namespace: rabbitmq-poc
+spec:
+  source: order.direct
+  destination: order.shipped
+  destinationType: queue
+  routingKey: order.shipped
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# === 場景 5: Topic → event.* queues (pattern matching) ===
+apiVersion: rabbitmq.com/v1beta1
+kind: Binding
+metadata:
+  name: topic-all-orders
+  namespace: rabbitmq-poc
+spec:
+  source: event.topic
+  destination: event.all-orders
+  destinationType: queue
+  routingKey: "order.#"
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Binding
+metadata:
+  name: topic-payments
+  namespace: rabbitmq-poc
+spec:
+  source: event.topic
+  destination: event.payments
+  destinationType: queue
+  routingKey: "payment.*"
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Binding
+metadata:
+  name: topic-audit-all
+  namespace: rabbitmq-poc
+spec:
+  source: event.topic
+  destination: event.audit
+  destinationType: queue
+  routingKey: "#"
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# === 場景 6: Headers → report.* queues ===
+apiVersion: rabbitmq.com/v1beta1
+kind: Binding
+metadata:
+  name: headers-pdf
+  namespace: rabbitmq-poc
+spec:
+  source: report.headers
+  destination: report.pdf
+  destinationType: queue
+  arguments:
+    x-match: all
+    format: pdf
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Binding
+metadata:
+  name: headers-excel
+  namespace: rabbitmq-poc
+spec:
+  source: report.headers
+  destination: report.excel
+  destinationType: queue
+  arguments:
+    x-match: all
+    format: excel
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# === 場景 7: RPC Exchange → rpc.credit-score queue ===
+apiVersion: rabbitmq.com/v1beta1
+kind: Binding
+metadata:
+  name: rpc-credit-score-binding
+  namespace: rabbitmq-poc
+spec:
+  source: rpc.exchange
+  destination: rpc.credit-score
+  destinationType: queue
+  routingKey: rpc.credit-score
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# === 場景 8: DLX Exchange → dead.letter.queue ===
+apiVersion: rabbitmq.com/v1beta1
+kind: Binding
+metadata:
+  name: dlx-to-dead-letter
+  namespace: rabbitmq-poc
+spec:
+  source: dlx.exchange
+  destination: dead.letter.queue
+  destinationType: queue
+  vhost: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster

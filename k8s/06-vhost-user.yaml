@@ -1,0 +1,50 @@
+# Vhost
+apiVersion: rabbitmq.com/v1beta1
+kind: Vhost
+metadata:
+  name: poc-vhost
+  namespace: rabbitmq-poc
+spec:
+  name: poc
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+---
+# User
+apiVersion: rabbitmq.com/v1beta1
+kind: User
+metadata:
+  name: poc-app-user
+  namespace: rabbitmq-poc
+spec:
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
+  importCredentialsSecret:
+    name: poc-app-credentials
+---
+# User credentials Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: poc-app-credentials
+  namespace: rabbitmq-poc
+type: Opaque
+stringData:
+  username: poc-app
+  password: poc-app-secret-2024
+---
+# Permission
+apiVersion: rabbitmq.com/v1beta1
+kind: Permission
+metadata:
+  name: poc-app-permission
+  namespace: rabbitmq-poc
+spec:
+  vhost: poc
+  userReference:
+    name: poc-app-user
+  permissions:
+    configure: ".*"
+    write: ".*"
+    read: ".*"
+  rabbitmqClusterReference:
+    name: rabbitmq-poc-cluster
