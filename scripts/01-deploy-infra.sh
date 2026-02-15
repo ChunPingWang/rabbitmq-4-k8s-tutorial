@@ -19,11 +19,17 @@ fi
 
 kubectl cluster-info --context "kind-${CLUSTER_NAME}"
 
+# Wait for all nodes to be Ready before installing anything
+echo "  Waiting for all nodes to be Ready..."
+kubectl wait --for=condition=Ready nodes --all --timeout=300s
+echo "  Waiting 30s for cluster to stabilize..."
+sleep 30
+
 # --- 2. cert-manager ---
 echo "[STEP 2/6] Installing cert-manager..."
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml
-echo "  Waiting for cert-manager pods..."
-kubectl wait --for=condition=Ready pods --all -n cert-manager --timeout=180s
+echo "  Waiting for cert-manager pods (up to 5 min)..."
+kubectl wait --for=condition=Ready pods --all -n cert-manager --timeout=300s
 
 # --- 3. Namespace ---
 echo "[STEP 3/6] Creating namespace..."
@@ -39,14 +45,14 @@ echo "[STEP 5/6] Installing Messaging Topology Operator..."
 kubectl apply -f https://github.com/rabbitmq/messaging-topology-operator/releases/latest/download/messaging-topology-operator-with-certmanager.yaml
 
 echo "  Waiting for rabbitmq-system pods..."
-kubectl wait --for=condition=Ready pods --all -n rabbitmq-system --timeout=180s
+kubectl wait --for=condition=Ready pods --all -n rabbitmq-system --timeout=300s
 
 # --- 6. NGINX Ingress Controller (for Kind) ---
 echo "[STEP 6/6] Installing NGINX Ingress Controller..."
 kubectl apply -f https://kind.sigs.k8s.io/examples/ingress/deploy-ingress-nginx.yaml
 echo "  Waiting for ingress-nginx pods..."
 kubectl wait --for=condition=Ready pods -l app.kubernetes.io/component=controller \
-  -n ingress-nginx --timeout=180s
+  -n ingress-nginx --timeout=300s
 
 # --- Verify ---
 echo ""
