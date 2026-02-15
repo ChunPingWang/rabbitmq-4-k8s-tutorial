@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: rabbitmq-poc
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: poc-app
+    password: poc-app-secret-2024
+    virtual-host: poc
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    listener:
+      simple:
+        default-requeue-rejected: false
+        acknowledge-mode: manual
+        prefetch: 10
+      direct:
+        acknowledge-mode: manual
+        prefetch: 10
+    template:
+      mandatory: true
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always

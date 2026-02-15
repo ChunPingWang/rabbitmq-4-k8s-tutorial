@@ -1,0 +1,19 @@
+spring:
+  rabbitmq:
+    host: rabbitmq-poc-cluster.rabbitmq-poc.svc.cluster.local
+    port: 5671
+    username: poc-app
+    password: ${RABBITMQ_PASSWORD}
+    virtual-host: poc
+    ssl:
+      enabled: true
+      bundle: rabbitmq-client
+  ssl:
+    bundle:
+      pem:
+        rabbitmq-client:
+          keystore:
+            certificate: file:/etc/rabbitmq-client-tls/tls.crt
+            private-key: file:/etc/rabbitmq-client-tls/tls.key
+          truststore:
+            certificate: file:/etc/rabbitmq-client-tls/ca.crt
