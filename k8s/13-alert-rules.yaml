@@ -1,0 +1,54 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: rabbitmq-alerts
+  namespace: rabbitmq-poc
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: rabbitmq.rules
+      rules:
+        - alert: RabbitMQQueueDepthHigh
+          expr: rabbitmq_queue_messages > 10000
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Queue depth > 10000 on {{ $labels.queue }}"
+            description: "Queue {{ $labels.queue }} has {{ $value }} messages pending."
+
+        - alert: RabbitMQNodeDown
+          expr: rabbitmq_identity_info < 3
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "RabbitMQ cluster has fewer than 3 nodes"
+            description: "Only {{ $value }} nodes are reporting. Expected 3."
+
+        - alert: RabbitMQMemoryHigh
+          expr: rabbitmq_process_resident_memory_bytes / rabbitmq_resident_memory_limit_bytes > 0.8
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "RabbitMQ memory usage > 80%"
+            description: "Node {{ $labels.instance }} memory at {{ $value | humanizePercentage }}."
+
+        - alert: RabbitMQDiskSpaceLow
+          expr: rabbitmq_disk_space_available_bytes < 2147483648
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "RabbitMQ disk space < 2GB"
+            description: "Node {{ $labels.instance }} has {{ $value | humanize1024 }} disk available."
+
+        - alert: RabbitMQUnackedMessagesHigh
+          expr: rabbitmq_queue_messages_unacked > 5000
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Unacked messages > 5000 on {{ $labels.queue }}"

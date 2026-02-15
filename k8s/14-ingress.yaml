@@ -1,0 +1,43 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rabbitmq-poc-ingress
+  namespace: rabbitmq-poc
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  rules:
+    # App API: http://app.rabbitmq.local/api/demo/*
+    - host: app.rabbitmq.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: rabbitmq-poc-app
+                port:
+                  number: 8080
+    # Management UI: http://mgmt.rabbitmq.local/
+    - host: mgmt.rabbitmq.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: rabbitmq-poc-cluster
+                port:
+                  number: 15672
+    # Grafana: http://grafana.rabbitmq.local/
+    - host: grafana.rabbitmq.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kube-prometheus-stack-grafana
+                port:
+                  number: 80

@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-poc-app
+  namespace: rabbitmq-poc
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rabbitmq-poc-app
+  template:
+    metadata:
+      labels:
+        app: rabbitmq-poc-app
+        rabbitmq-client: "true"
+    spec:
+      containers:
+        - name: app
+          image: rabbitmq-poc-app:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: k8s
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: poc-app-credentials
+                  key: password
+          volumeMounts:
+            - name: client-tls
+              mountPath: /etc/rabbitmq-client-tls
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+      volumes:
+        - name: client-tls
+          secret:
+            secretName: rabbitmq-client-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-poc-app
+  namespace: rabbitmq-poc
+spec:
+  selector:
+    app: rabbitmq-poc-app
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
