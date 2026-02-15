@@ -1,0 +1,47 @@
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: rabbitmq-poc-cluster
+  namespace: rabbitmq-poc
+spec:
+  replicas: 3
+  image: rabbitmq:4.0-management
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "1"
+      memory: 2Gi
+  persistence:
+    storageClassName: standard
+    storage: 10Gi
+  tls:
+    secretName: rabbitmq-server-tls
+    caSecretName: rabbitmq-ca-secret
+    disableNonTLSListeners: true
+  rabbitmq:
+    additionalConfig: |
+      default_queue_type = quorum
+      ssl_options.verify = verify_peer
+      ssl_options.fail_if_no_peer_cert = true
+      cluster_partition_handling = pause_minority
+      vm_memory_high_watermark.relative = 0.7
+      disk_free_limit.absolute = 1GB
+      management.ssl.port = 15671
+      management.ssl.cacertfile = /etc/rabbitmq-tls/ca.crt
+      management.ssl.certfile = /etc/rabbitmq-tls/tls.crt
+      management.ssl.keyfile = /etc/rabbitmq-tls/tls.key
+    additionalPlugins:
+      - rabbitmq_stream
+      - rabbitmq_stream_management
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - rabbitmq-poc-cluster
+          topologyKey: kubernetes.io/hostname

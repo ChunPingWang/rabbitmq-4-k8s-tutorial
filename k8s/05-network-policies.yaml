@@ -1,0 +1,125 @@
+# 1) 預設拒絕所有進入流量
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: rabbitmq-poc
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+# 2) 允許 RabbitMQ 節點間通訊 (clustering, AMQPS, management, stream)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-rabbitmq-internal
+  namespace: rabbitmq-poc
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: rabbitmq-poc-cluster
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: rabbitmq-poc-cluster
+      ports:
+        - port: 4369
+          protocol: TCP
+        - port: 25672
+          protocol: TCP
+        - port: 5671
+          protocol: TCP
+        - port: 15671
+          protocol: TCP
+        - port: 5552
+          protocol: TCP
+---
+# 3) 允許帶有 rabbitmq-client=true label 的 Pod 存取 RabbitMQ
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-app-to-rabbitmq
+  namespace: rabbitmq-poc
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: rabbitmq-poc-cluster
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              rabbitmq-client: "true"
+      ports:
+        - port: 5671
+          protocol: TCP
+        - port: 5552
+          protocol: TCP
+---
+# 4) 允許 Prometheus (monitoring namespace) 抓取 metrics
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-prometheus-scrape
+  namespace: rabbitmq-poc
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: rabbitmq-poc-cluster
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - port: 15692
+          protocol: TCP
+---
+# 5) 允許 Ingress Controller 存取 RabbitMQ Management UI
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-management
+  namespace: rabbitmq-poc
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: rabbitmq-poc-cluster
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - port: 15671
+          protocol: TCP
+---
+# 6) 允許 Ingress Controller 存取 App
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-app
+  namespace: rabbitmq-poc
+spec:
+  podSelector:
+    matchLabels:
+      app: rabbitmq-poc-app
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - port: 8080
+          protocol: TCP
