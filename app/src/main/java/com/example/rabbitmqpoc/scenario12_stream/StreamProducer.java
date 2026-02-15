@@ -4,6 +4,7 @@ import org.springframework.rabbit.stream.producer.RabbitStreamTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
+@org.springframework.context.annotation.Lazy
 public class StreamProducer {
 
     private final RabbitStreamTemplate streamTemplate;

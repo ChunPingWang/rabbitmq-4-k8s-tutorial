@@ -103,7 +103,34 @@ spec:
         - port: 15671
           protocol: TCP
 ---
-# 6) 允許 Ingress Controller 存取 App
+# 6) 允許 RabbitMQ Operators (rabbitmq-system namespace) 存取 Management API
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-operators-to-rabbitmq
+  namespace: rabbitmq-poc
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: rabbitmq-poc-cluster
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: rabbitmq-system
+      ports:
+        - port: 15671
+          protocol: TCP
+        - port: 5671
+          protocol: TCP
+        - port: 4369
+          protocol: TCP
+        - port: 25672
+          protocol: TCP
+---
+# 7) 允許 Ingress Controller 存取 App
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

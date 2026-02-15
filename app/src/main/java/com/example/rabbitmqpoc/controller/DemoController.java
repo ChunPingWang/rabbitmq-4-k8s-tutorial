@@ -13,6 +13,7 @@ import com.example.rabbitmqpoc.scenario09_delayed.DelayedMessageProducer;
 import com.example.rabbitmqpoc.scenario10_priority.PriorityProducer;
 import com.example.rabbitmqpoc.scenario11_quorum.QuorumQueueDemo;
 import com.example.rabbitmqpoc.scenario12_stream.StreamProducer;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -47,7 +48,7 @@ public class DemoController {
                           DelayedMessageProducer delayedMessageProducer,
                           PriorityProducer priorityProducer,
                           QuorumQueueDemo quorumQueueDemo,
-                          StreamProducer streamProducer) {
+                          @Lazy StreamProducer streamProducer) {
         this.simpleProducer = simpleProducer;
         this.workQueueProducer = workQueueProducer;
         this.notificationProducer = notificationProducer;

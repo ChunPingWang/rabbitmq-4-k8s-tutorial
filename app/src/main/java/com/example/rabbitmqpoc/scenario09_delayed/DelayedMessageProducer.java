@@ -22,7 +22,7 @@ public class DelayedMessageProducer {
             msg.getMessageProperties().setExpiration(String.valueOf(delayMs));
             return msg;
         };
-        rabbitTemplate.convertAndSend("delay.parking", message, postProcessor);
+        rabbitTemplate.convertAndSend("", "delay.parking", message, postProcessor);
         System.out.printf("[Delayed] Sent with delay=%dms: %s%n", delayMs, message);
     }
 
